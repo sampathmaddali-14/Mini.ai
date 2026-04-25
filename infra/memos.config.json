@@ -1,0 +1,56 @@
+{
+  "$comment": "MemOS configuration for Mini.ai. Three-tier memory with Qdrant (vectors) and Kuzu (graph) backends.",
+  "version": "1.0",
+  "user_id": "mini-ai-default",
+
+  "memory_tiers": {
+    "episodic": {
+      "backend": "qdrant",
+      "collection": "mini_episodic",
+      "embedding_model": "bge-m3",
+      "decay_half_life_days": 14,
+      "max_items": 50000
+    },
+    "semantic": {
+      "backend": "qdrant",
+      "collection": "mini_semantic",
+      "embedding_model": "bge-m3",
+      "decay_half_life_days": 180,
+      "max_items": 10000
+    },
+    "graph": {
+      "backend": "kuzu",
+      "database": "/database/mini.kuzu"
+    },
+    "working": {
+      "backend": "activation",
+      "$comment": "In-process activation state, not persisted"
+    }
+  },
+
+  "write_path": {
+    "salience_gate": true,
+    "salience_threshold": 0.3,
+    "dedup_similarity_threshold": 0.92,
+    "contradiction_check": true
+  },
+
+  "retrieval": {
+    "default_top_k": 8,
+    "hybrid": true,
+    "graph_hops": 2,
+    "hide_superseded": true
+  },
+
+  "scheduler": {
+    "$comment": "MemOS internal scheduler. OpenClaw heartbeat handles the cognitive policy schedules.",
+    "async_ingestion": true,
+    "batch_size": 32
+  },
+
+  "llm": {
+    "provider": "anthropic",
+    "model": "${MEMOS_DEFAULT_MODEL}",
+    "api_key_env": "ANTHROPIC_API_KEY"
+  }
+}

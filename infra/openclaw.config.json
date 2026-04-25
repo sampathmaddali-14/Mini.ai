@@ -1,0 +1,68 @@
+{
+  "$comment": "OpenClaw configuration for Mini.ai. Single-user. Heartbeat schedules trigger the cognitive policies.",
+  "version": "1.0",
+
+  "agent": {
+    "name": "mini",
+    "model": "claude-opus-4-7",
+    "max_tokens": 4096,
+    "system_prompt_file": "/etc/openclaw/system_prompt.md"
+  },
+
+  "channels": {
+    "cli": { "enabled": true },
+    "telegram": { "enabled": false, "bot_token_env": "TELEGRAM_BOT_TOKEN" }
+  },
+
+  "mcp_servers": {
+    "openspace": {
+      "url": "${OPENSPACE_MCP_URL}",
+      "auto_load_skills": true
+    }
+  },
+
+  "memory": {
+    "plugin": "@memtensor/memos-local-openclaw-plugin",
+    "url": "${MEMOS_URL}",
+    "pre_turn_recall": true,
+    "post_turn_capture": true,
+    "recall_top_k": 8
+  },
+
+  "heartbeat": {
+    "enabled": true,
+    "jobs": [
+      {
+        "id": "reflection",
+        "cron": "*/30 * * * *",
+        "skill": "reflection",
+        "$comment": "Every 30 minutes: score recent skill invocations, extract insights"
+      },
+      {
+        "id": "rewire_sweep",
+        "cron": "0 * * * *",
+        "skill": "rewire",
+        "args": { "mode": "sweep" },
+        "$comment": "Hourly: entity co-occurrence edge creation"
+      },
+      {
+        "id": "consolidation",
+        "cron": "0 3 * * *",
+        "skill": "consolidation",
+        "$comment": "Daily at 03:00: episodic → semantic summarization. The sleep analog."
+      },
+      {
+        "id": "pruning",
+        "cron": "30 3 * * 0",
+        "skill": "pruning",
+        "$comment": "Sundays at 03:30: decay-based memory deletion"
+      }
+    ]
+  },
+
+  "logging": {
+    "level": "${LOG_LEVEL}",
+    "format": "json",
+    "file": "/var/lib/openclaw/openclaw.log"
+  }
+}
