@@ -28,12 +28,12 @@ Last updated: 2026-04-25 (post-Architecture-L pivot)
 > Reset 2026-04-25 after S001 failed (3 of 5 Docker images don't exist on Hub). New plan follows Architecture L — host install of OpenClaw + MemOS Local plugin + OpenSpace. See [`docs/04-deployment-reality.md`](docs/04-deployment-reality.md) for the rationale and [`docs/install.md`](docs/install.md) for the actual commands.
 
 ### Week 1 — Host install
-- [ ] **S001** — Install OpenClaw on host (`npx openclaw onboard`). `openclaw gateway start` runs without errors.
-- [ ] **S002** — CLI channel works. Send a message, get a response from Claude.
+- [x] **S001** — OpenClaw 2026.4.23 installed and running under Node 24 (launchd-managed). Onboarding completed; gateway listening on `127.0.0.1:18789`. _2026-04-25_
+- [x] **S002** — Web chat (Dashboard Control UI) working — replaced WhatsApp from initial onboarding. Real conversations observed in logs. _2026-04-25_
 - [x] **S005** — `.env.example` populated correctly; missing vars fail fast.
-- [ ] **S009** — MemOS Local OpenClaw plugin installed (`@memtensor/memos-local-openclaw-plugin`) and enabled in `~/.openclaw/openclaw.json`. Pre-turn recall + post-turn capture happen automatically.
-- [ ] **S012** — OpenSpace installed (`pip install -e .` from clone); `openspace-mcp` registered as MCP server in OpenClaw config; `OPENSPACE_HOST_SKILL_DIRS` points at `Mini.ai/skills/`.
-- [ ] **S013** — From OpenClaw, asking the agent to `search_skills` returns the six policy SKILL.md files plus OpenSpace's `delegate-task` and `skill-discovery` host skills.
+- [x] **S009** — MemOS Local OpenClaw plugin installed (`@memtensor/memos-local-openclaw-plugin@1.0.9`), enabled in `~/.openclaw/openclaw.json`. SQLite store provisioned. **Pre-turn recall hook live** (auto-recall fires every turn, embedding model loaded). **Post-turn capture hook blocked** by an OpenClaw config-validator/loader inconsistency on `plugins.entries.*.hooks.allowConversationAccess` — workaround: agent uses explicit `memory_write_public` tool when user says "remember this". _2026-04-25_
+- [x] **S012** — OpenSpace cloned (`~/OpenSpace`), installed via Python 3.12 venv (`~/OpenSpace/.venv`), `openspace-mcp` available. Registered in OpenClaw via `openclaw mcp set openspace ...`. `OPENSPACE_HOST_SKILL_DIRS` points at `~/Downloads/mini-ai/skills`. _2026-04-25_
+- [ ] **S013** — Verify behavioral: from OpenClaw dashboard, agent calls OpenSpace `search_skills` and returns the 6 cognitive policies plus `delegate-task` + `skill-discovery` host skills. Pending live test.
 
 **Done when:** OpenClaw gateway is up, CLI channel responds, the MemOS plugin recalls a `remember this` memory in a fresh turn, and OpenSpace lists our skills.
 
@@ -137,9 +137,9 @@ Update this section as you go. Anything that would help future-you (or another C
 
 - **Working environment:** Repo at `github.com/sampathmaddali-14/Mini.ai`. Python 3.12. Docker Compose for local. GCP for deploy.
 - **Currently iterating from:** Claude Code on macOS (worktree).
-- **Last thing worked on:** Architecture L pivot — `docs/install.md`, design.md topology fix, README rewrite, Sprint 0 re-plan after S001 attempt failed (3 of 5 Docker images don't exist on Hub).
-- **Blockers:** None — install commands are verified against upstream READMEs.
-- **Next concrete action:** Walk through `docs/install.md` from prereqs through Step 4 verification, ticking S001 / S002 / S009 / S012 / S013 as each gate passes.
+- **Last thing worked on:** Got OpenClaw + MemOS Local plugin + OpenSpace all running on host (S001/S002/S005/S009/S012 ticked). Surfaced an OpenClaw upstream bug on `plugins.entries.*.hooks.allowConversationAccess` (validator vs loader inconsistency) — needs filing.
+- **Blockers:** None blocking forward motion. Auto-capture deferred behind explicit `memory_write_public` tool path until upstream bug fix.
+- **Next concrete action:** S013 behavioral test — in dashboard, ask the agent to "list skills via OpenSpace" and confirm `search_skills` returns the 6 cognitive policies + 2 host skills. Then wire the cognitive policies as proper OpenSpace skills (S014/S015).
 
 ---
 
