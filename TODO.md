@@ -28,7 +28,7 @@ Last updated: 2026-04-25
 ### Week 1 — Stack up locally
 - [ ] **S001** — Get OpenClaw running via Docker Compose. Verify `docker compose ps` shows it Up.
 - [ ] **S002** — CLI channel works. Send a message, get a response.
-- [ ] **S005** — `.env.example` populated correctly; missing vars fail fast.
+- [x] **S005** — `.env.example` populated correctly; missing vars fail fast.
 - [ ] **S006** — Qdrant container reachable from MemOS network.
 - [ ] **S007** — Kuzu container running, basic node/edge round-trip works.
 - [ ] **S008** — MemOS deployed with Qdrant + Kuzu config; API responds.
@@ -137,10 +137,10 @@ Last updated: 2026-04-25
 Update this section as you go. Anything that would help future-you (or another Claude session) pick up the thread.
 
 - **Working environment:** Repo at `github.com/sampathmaddali-14/Mini.ai`. Python 3.12. Docker Compose for local. GCP for deploy.
-- **Currently iterating from:** _(fill in: laptop / phone / Claude Code / Claude.ai / iOS app)_
-- **Last thing worked on:** _(fill in)_
-- **Blockers:** _(fill in)_
-- **Next concrete action:** _(fill in — keep this to one sentence)_
+- **Currently iterating from:** Claude Code on macOS (worktree).
+- **Last thing worked on:** S005 — created `.env.example`, hardened `.gitignore`, made `ANTHROPIC_API_KEY` fail-fast in `infra/docker-compose.yml`.
+- **Blockers:** Docker Desktop not yet installed on this Mac — required before S001 can run.
+- **Next concrete action:** Install Docker Desktop (`brew install --cask docker`, launch once), then run `docker compose -f infra/docker-compose.yml up -d` from repo root and verify `docker compose ps` shows OpenClaw Up (S001).
 
 ---
 

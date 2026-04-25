@@ -1,1 +1,23 @@
+# Claude Code worktrees and local config
 .claude/
+
+# Secrets — never commit
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Local data volumes / outputs
+data/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
