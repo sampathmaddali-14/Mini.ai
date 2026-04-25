@@ -1,18 +1,6 @@
 ---
 name: rewire
 description: "Edit the knowledge graph. Two modes: (1) 'resolve' mode fires when the curation policy flags a contradiction, marking the older fact superseded and linking the new one. (2) 'sweep' mode fires on heartbeat, looking for new entity co-occurrences in recent episodes and adding graph edges."
-triggers:
-  - event: contradiction_flagged  # from curation policy
-  - cron: "0 * * * *"  # hourly sweep
-inputs:
-  - mode: resolve | sweep
-  - resolve: { old_memory_id, new_memory_id }
-  - sweep: { window_hours: 1 }
-outputs:
-  - edges_added: int
-  - supersessions: int
-  - orphans_queued: int
-  - log_entry: json
 ---
 
 # Rewire policy

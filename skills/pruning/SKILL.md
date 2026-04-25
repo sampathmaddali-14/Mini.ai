@@ -1,16 +1,6 @@
 ---
 name: pruning
 description: "Weekly job that deletes memories below the decay threshold. Cascades deletions through the graph, removes orphans, writes tombstones. Runs Sundays at 03:30 local time."
-triggers:
-  - cron: "30 3 * * 0"
-inputs:
-  - decay_half_life_days: 14 (episodic) | 180 (semantic)
-  - dry_run: false
-outputs:
-  - memories_deleted: int
-  - edges_removed: int
-  - orphans_cleaned: int
-  - log_entry: json
 ---
 
 # Pruning policy

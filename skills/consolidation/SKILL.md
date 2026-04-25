@@ -1,15 +1,6 @@
 ---
 name: consolidation
 description: "Daily job that summarizes the previous day's episodic memories into semantic memory. This is Mini.ai's sleep analog — the process by which raw experience becomes distilled knowledge. Runs at 03:00 local time."
-triggers:
-  - cron: "0 3 * * *"
-inputs:
-  - date: yesterday (ISO)
-outputs:
-  - semantic_memories_written: int
-  - episodes_consolidated: int
-  - promoted_to_long_term: int
-  - log_entry: json
 ---
 
 # Consolidation policy

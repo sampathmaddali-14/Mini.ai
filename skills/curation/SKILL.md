@@ -1,18 +1,6 @@
 ---
 name: curation
 description: "Evaluate a candidate memory before writing to MemOS. Score salience, detect near-duplicates, flag contradictions. Invoke post-turn or whenever a new piece of information is a candidate for persistence. Default policy for every write."
-triggers:
-  - post_turn
-  - explicit: remember_this
-inputs:
-  - candidate_memory: { content, source, timestamp, entities? }
-  - recent_memories: { list, top 20 by recency }
-outputs:
-  - decision: accept | merge | reject | supersede
-  - salience_score: 0.0 - 1.0
-  - merge_target_id: string?  # if decision == merge
-  - contradiction_flag: bool
-  - log_entry: json
 ---
 
 # Curation policy

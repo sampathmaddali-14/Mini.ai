@@ -1,15 +1,6 @@
 ---
 name: reflection
 description: "Run a self-review every 30 minutes. Score recent skill invocations, update skill quality metadata, extract patterns from recent episodes, write insights to semantic memory. This is the 'thinking about your own thinking' layer."
-triggers:
-  - cron: "*/30 * * * *"
-inputs:
-  - window_minutes: 30
-outputs:
-  - insights_written: int
-  - skills_scored: int
-  - skills_deprecated: int
-  - log_entry: json
 ---
 
 # Reflection policy

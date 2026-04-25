@@ -82,6 +82,15 @@ OpenSpace runs as an MCP server (`openspace-mcp`). OpenClaw discovers it via sta
 
 Each policy is a SKILL.md file under `skills/<verb>/`. The SKILL.md is what the agent reads when deciding to invoke the policy. The Python module under `src/policies/<verb>.py` holds the pure logic (salience scoring, decay function, threshold rules) and is callable from a small wrapper invoked by OpenSpace. Sprint 0 includes the work of finalizing exactly how `src/policies/*.py` is invoked from a SKILL.md (script subprocess vs imported module).
 
+#### SKILL.md frontmatter convention
+
+OpenSpace's frontmatter parser (`openspace/skill_engine/skill_utils.py:parse_frontmatter`) is intentionally a simple line-by-line `key: value` reader — it does **not** support YAML lists, nested objects, or anchors. To keep our skills loadable upstream, the frontmatter is restricted to flat scalar keys:
+
+- `name` — required
+- `description` — required
+
+Earlier drafts of these SKILL.md files included `triggers`, `inputs`, and `outputs` as nested YAML in the frontmatter. The OpenSpace parser silently produces garbage keys for those (e.g., `"- candidate_memory"` becomes a key). The richer schema is preserved in the markdown body (see each skill's "Decision tree", "Implementation notes", "When NOT to fire" sections), where it serves as both human documentation and as the playbook the agent follows when invoking the skill.
+
 ## Memory model
 
 Three tiers, all addressable through MemOS's unified API:

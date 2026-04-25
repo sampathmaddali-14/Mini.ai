@@ -1,18 +1,6 @@
 ---
 name: unlearn
 description: "On-demand deletion. Triggered by the user ('forget X') or by a policy ('this was a test, remove the fixtures'). Cascades through graph, writes tombstones, supports recovery within a grace window."
-triggers:
-  - user_command: "forget <scope>"
-  - policy_invoke
-inputs:
-  - scope: { type: topic | entity | time_range | memory_id, value }
-  - confirmation: bool (required if estimated_deletions > 10)
-outputs:
-  - matched: int
-  - deleted: int
-  - edges_removed: int
-  - tombstones_written: int
-  - log_entry: json
 ---
 
 # Unlearn policy

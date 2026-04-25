@@ -44,7 +44,7 @@ Last updated: 2026-04-25 (post-Architecture-L pivot)
 - [ ] **S004** — Structured logging (JSON, trace_id, policy, duration, outcome) wherever we own code.
 - [ ] **S010** — Memory inspector CLI: read the MemOS plugin's SQLite store and show recent memories. Replaces the original `src/core/inspect.py` (which assumed an HTTP MemOS service that doesn't exist).
 - [ ] **S011** — Seed fixtures script loads ≥50 episodic + 10 semantic memories via the plugin's add-memory API.
-- [ ] **S014** — Compare our SKILL.md frontmatter (`triggers`, `inputs`, `outputs`) with OpenSpace's actual schema (just `name` + `description` per `delegate-task`). Decide: keep extra fields as Mini.ai-internal documentation, or align strictly with upstream.
+- [x] **S014** — Verified upstream parser is a flat `key: value` reader (`openspace/skill_engine/skill_utils.py:parse_frontmatter`). Stripped `triggers`/`inputs`/`outputs` from all 6 cognitive policy SKILL.md files; rich schema preserved in body. Convention documented in `docs/03-design.md`. _2026-04-25_
 - [ ] **S015** — Manual end-to-end skill invocation: agent calls a Mini.ai policy via OpenSpace's `execute_task`, the policy runs, the result is captured in plugin memory.
 
 ### Week 3 — Curation + Rewire foundations
@@ -137,9 +137,9 @@ Update this section as you go. Anything that would help future-you (or another C
 
 - **Working environment:** Repo at `github.com/sampathmaddali-14/Mini.ai`. Python 3.12. Docker Compose for local. GCP for deploy.
 - **Currently iterating from:** Claude Code on macOS (worktree).
-- **Last thing worked on:** Got OpenClaw + MemOS Local plugin + OpenSpace all running on host (S001/S002/S005/S009/S012 ticked). Surfaced an OpenClaw upstream bug on `plugins.entries.*.hooks.allowConversationAccess` (validator vs loader inconsistency) — needs filing.
-- **Blockers:** None blocking forward motion. Auto-capture deferred behind explicit `memory_write_public` tool path until upstream bug fix.
-- **Next concrete action:** S013 behavioral test — in dashboard, ask the agent to "list skills via OpenSpace" and confirm `search_skills` returns the 6 cognitive policies + 2 host skills. Then wire the cognitive policies as proper OpenSpace skills (S014/S015).
+- **Last thing worked on:** S014 — flattened all 6 cognitive policy SKILL.md frontmatters to OpenSpace-compatible `{name, description}` only (verified with upstream's `parse_frontmatter`). Rich schema preserved in body. Convention documented in design.md.
+- **Blockers:** None blocking forward motion. Auto-capture still deferred behind the upstream OpenClaw bug.
+- **Next concrete action:** S013 dashboard verification (ask agent: "what skills do you have through OpenSpace?"); then S015 — make `curation` actually invokable end-to-end (requires a small Python wrapper that calls `src/policies/salience.py` and the MemOS plugin's `memory_search` tool, called from the SKILL.md body).
 
 ---
 
