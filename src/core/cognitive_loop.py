@@ -1,4 +1,25 @@
 """
+⚠️ STALE — DO NOT USE AS-IS (2026-04-25 Architecture L pivot)
+
+This module pings HTTP endpoints (MemOS, OpenSpace, OpenClaw) that don't exist
+in Architecture L:
+  - MemOS runs in-process inside OpenClaw (no HTTP).
+  - OpenSpace MCP uses stdio by default, not /healthz.
+  - OpenClaw exposes its gateway over a different mechanism than this assumes.
+
+To be replaced in Sprint 0 with a host-install sanity check that:
+  - Verifies `openclaw --version` works.
+  - Verifies `openspace-mcp --help` works.
+  - Reads the plugin's SQLite file path and checks it exists.
+
+The seed_fixtures function will be rewritten to call the MemOS plugin's add API
+once Sprint 0 settles on whether we use the plugin's CLI or a subprocess wrapper.
+
+Kept for now so we can lift the structure (argparse, logging) into the
+replacement without retyping it.
+
+Original docstring follows.
+---
 Cognitive loop — entrypoint and sanity check.
 
 Usage:

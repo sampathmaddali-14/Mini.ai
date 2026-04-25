@@ -4,49 +4,48 @@ Living checklist. Works across sessions and terminals. Update by editing this fi
 
 **Status legend:** `[x]` done · `[ ]` open · `[~]` in progress · `[?]` blocked / needs decision
 
-Last updated: 2026-04-25
+Last updated: 2026-04-25 (post-Architecture-L pivot)
 
 ---
 
-## ✅ Phase 0 — Scaffolding (DONE)
+## ✅ Phase 0 — Scaffolding (PARTIAL — see notes)
 
 - [x] Product brief, capabilities, design docs (`docs/`)
 - [x] Backlog with 13 epics, 56 stories, Sprint 0 plan, risks (`backlog.xlsx`)
 - [x] Six cognitive policy specs (`skills/<verb>/SKILL.md`)
-- [x] Six cognitive policy implementations (`src/policies/`)
+- [x] Six cognitive policy implementations (`src/policies/`) — **logic only; integration glue pending**
 - [x] Pure-logic unit tests — 10 passing (`tests/test_pure_logic.py`)
-- [x] Local Docker Compose stack (`infra/docker-compose.yml`)
-- [x] GCP Terraform + startup + deploy scripts (`infra/gcp/`)
+- [~] ~~Local Docker Compose stack~~ → **superseded by host install (Architecture L)**. Compose now keeps Qdrant/Kuzu only as optional Phase 1b storage. See [`docs/install.md`](docs/install.md).
+- [~] ~~GCP Terraform + startup + deploy scripts~~ → **deferred to Phase 2.** Current files reference the broken Docker stack.
 - [x] LICENSE (MIT) + CONTRIBUTING + README + CLAUDE.md
 - [x] GitHub Actions CI (pytest on push)
 - [x] Repo: github.com/sampathmaddali-14/Mini.ai
 
 ---
 
-## 🔄 Sprint 0 — Make it actually run (4 weeks)
+## 🔄 Sprint 0 — Host-install end-to-end loop (4 weeks)
 
-### Week 1 — Stack up locally
-- [ ] **S001** — Get OpenClaw running via Docker Compose. Verify `docker compose ps` shows it Up.
-- [ ] **S002** — CLI channel works. Send a message, get a response.
+> Reset 2026-04-25 after S001 failed (3 of 5 Docker images don't exist on Hub). New plan follows Architecture L — host install of OpenClaw + MemOS Local plugin + OpenSpace. See [`docs/04-deployment-reality.md`](docs/04-deployment-reality.md) for the rationale and [`docs/install.md`](docs/install.md) for the actual commands.
+
+### Week 1 — Host install
+- [ ] **S001** — Install OpenClaw on host (`npx openclaw onboard`). `openclaw gateway start` runs without errors.
+- [ ] **S002** — CLI channel works. Send a message, get a response from Claude.
 - [x] **S005** — `.env.example` populated correctly; missing vars fail fast.
-- [ ] **S006** — Qdrant container reachable from MemOS network.
-- [ ] **S007** — Kuzu container running, basic node/edge round-trip works.
-- [ ] **S008** — MemOS deployed with Qdrant + Kuzu config; API responds.
-- [ ] **S012** — OpenSpace MCP server registered with OpenClaw.
-- [ ] **S013** — Skills directory mounted; `skills list` returns the six policy stubs.
+- [ ] **S009** — MemOS Local OpenClaw plugin installed (`@memtensor/memos-local-openclaw-plugin`) and enabled in `~/.openclaw/openclaw.json`. Pre-turn recall + post-turn capture happen automatically.
+- [ ] **S012** — OpenSpace installed (`pip install -e .` from clone); `openspace-mcp` registered as MCP server in OpenClaw config; `OPENSPACE_HOST_SKILL_DIRS` points at `Mini.ai/skills/`.
+- [ ] **S013** — From OpenClaw, asking the agent to `search_skills` returns the six policy SKILL.md files plus OpenSpace's `delegate-task` and `skill-discovery` host skills.
 
-**Done when:** `docker compose up` brings everything up green; CLI channel works; MemOS API responds.
+**Done when:** OpenClaw gateway is up, CLI channel responds, the MemOS plugin recalls a `remember this` memory in a fresh turn, and OpenSpace lists our skills.
 
-### Week 2 — Wire the basics
-- [ ] **S003** — Heartbeat scheduler fires on cron schedules. At least 30m / daily / weekly schedules each invoke a test skill.
-- [ ] **S004** — Structured logging: JSON lines with trace_id, policy, duration, outcome.
-- [ ] **S009** — Official OpenClaw MemOS plugin installed and active. Pre-turn recall + post-turn capture happen automatically.
-- [ ] **S010** — Memory inspector CLI works: `python -m src.core.inspect memories --last 20`.
-- [ ] **S011** — Seed fixtures script loads ≥50 episodic + 10 semantic memories.
-- [ ] **S014** — Policy SKILL.md template formalized; all six policies match.
-- [ ] **S015** — Manual skill invocation works end-to-end with mock context.
+> ~~S006, S007, S008~~ — **deferred to Phase 1b.** The MemOS Local plugin includes its own SQLite + FTS5 + vector pipeline, so separate Qdrant / Kuzu / MemOS-as-service containers are not part of v0.1.
 
-**Done when:** A real conversation retrieves and writes memories; inspector CLI shows them; one heartbeat-triggered test skill runs successfully.
+### Week 2 — Skill schema + memory verification
+- [ ] **S003** — Heartbeat scheduler. **Open question:** is OpenClaw's gateway cron-capable, or do we run a small `apscheduler` daemon in `src/core/heartbeat.py`? Decide by end of Week 1.
+- [ ] **S004** — Structured logging (JSON, trace_id, policy, duration, outcome) wherever we own code.
+- [ ] **S010** — Memory inspector CLI: read the MemOS plugin's SQLite store and show recent memories. Replaces the original `src/core/inspect.py` (which assumed an HTTP MemOS service that doesn't exist).
+- [ ] **S011** — Seed fixtures script loads ≥50 episodic + 10 semantic memories via the plugin's add-memory API.
+- [ ] **S014** — Compare our SKILL.md frontmatter (`triggers`, `inputs`, `outputs`) with OpenSpace's actual schema (just `name` + `description` per `delegate-task`). Decide: keep extra fields as Mini.ai-internal documentation, or align strictly with upstream.
+- [ ] **S015** — Manual end-to-end skill invocation: agent calls a Mini.ai policy via OpenSpace's `execute_task`, the policy runs, the result is captured in plugin memory.
 
 ### Week 3 — Curation + Rewire foundations
 - [ ] **S016** — Salience score function unit-tested (already done in `tests/test_pure_logic.py` ✓ but verify wired into curation path).
@@ -138,9 +137,9 @@ Update this section as you go. Anything that would help future-you (or another C
 
 - **Working environment:** Repo at `github.com/sampathmaddali-14/Mini.ai`. Python 3.12. Docker Compose for local. GCP for deploy.
 - **Currently iterating from:** Claude Code on macOS (worktree).
-- **Last thing worked on:** S005 — created `.env.example`, hardened `.gitignore`, made `ANTHROPIC_API_KEY` fail-fast in `infra/docker-compose.yml`.
-- **Blockers:** Docker Desktop not yet installed on this Mac — required before S001 can run.
-- **Next concrete action:** Install Docker Desktop (`brew install --cask docker`, launch once), then run `docker compose -f infra/docker-compose.yml up -d` from repo root and verify `docker compose ps` shows OpenClaw Up (S001).
+- **Last thing worked on:** Architecture L pivot — `docs/install.md`, design.md topology fix, README rewrite, Sprint 0 re-plan after S001 attempt failed (3 of 5 Docker images don't exist on Hub).
+- **Blockers:** None — install commands are verified against upstream READMEs.
+- **Next concrete action:** Walk through `docs/install.md` from prereqs through Step 4 verification, ticking S001 / S002 / S009 / S012 / S013 as each gate passes.
 
 ---
 

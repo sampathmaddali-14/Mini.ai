@@ -1,0 +1,24 @@
+{
+  "$comment": "Example fragment for ~/.openclaw/openclaw.json after running 'openclaw onboard'. The real file lives in your home directory, NOT in this repo. This file documents the entries Mini.ai expects you to add.",
+
+  "plugins": {
+    "entries": {
+      "memos-local-openclaw-plugin": {
+        "$comment": "Installed via: openclaw plugins install @memtensor/memos-local-openclaw-plugin@latest",
+        "enabled": true
+      }
+    }
+  },
+
+  "mcpServers": {
+    "openspace": {
+      "$comment": "Replace the two absolute paths below with your actual paths. OpenSpace is installed by 'pip install -e .' from a clone of github.com/HKUDS/OpenSpace.",
+      "command": "openspace-mcp",
+      "toolTimeout": 600,
+      "env": {
+        "OPENSPACE_HOST_SKILL_DIRS": "/absolute/path/to/Mini.ai/skills",
+        "OPENSPACE_WORKSPACE": "/absolute/path/to/OpenSpace"
+      }
+    }
+  }
+}

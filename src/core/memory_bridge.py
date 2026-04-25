@@ -1,4 +1,21 @@
 """
+⚠️ STALE — DO NOT USE AS-IS (2026-04-25 Architecture L pivot)
+
+This module was written assuming a standalone MemOS HTTP service running on
+http://localhost:7070. In Architecture L the MemOS Local plugin runs in-process
+inside OpenClaw and exposes no HTTP endpoint, so calls from this client will
+fail with connection refused.
+
+Sprint 0 will replace this with one of:
+  (a) A reader for the plugin's SQLite store (read-only inspection),
+  (b) A subprocess wrapper around the plugin's CLI (write path),
+  (c) Deletion if neither is needed once the policies live as OpenSpace skills.
+
+Kept for now so the policy modules in src/policies/* still import cleanly and
+the unit tests in tests/test_pure_logic.py keep passing.
+
+Original docstring follows.
+---
 Thin HTTP client for MemOS. The official plugin handles the OpenClaw <-> MemOS
 path. This bridge is for our own Python code (policies, inspection, scripts).
 

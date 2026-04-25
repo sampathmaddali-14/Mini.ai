@@ -1,4 +1,12 @@
 """
+⚠️ STALE — DO NOT USE AS-IS (2026-04-25 Architecture L pivot)
+
+Reads memories via MemoryBridge (HTTP client to a service that doesn't exist
+in Arch L). To be rewritten in Sprint 0 (story S010) as a direct reader of the
+MemOS Local plugin's SQLite database.
+
+Original docstring follows.
+---
 Memory inspector — simple CLI for browsing the agent's memory.
 
 Usage:

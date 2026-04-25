@@ -1,16 +1,17 @@
-# Mini.ai — local stack
-# Run: docker compose -f infra/docker-compose.yml up -d
+# Mini.ai — optional auxiliary storage (Phase 1b)
 #
-# Services:
-#   qdrant   — vector store (Apache 2.0)
-#   kuzu     — graph store (MIT, runs as a sidecar REST proxy)
-#   memos    — memory OS (Apache 2.0)
-#   openspace — skill runtime (permissive)
-#   openclaw — agent daemon (MIT)
+# v0.1 runs everything on the host — see ../docs/install.md.
+# This file is kept around for Phase 1b experiments where we may want
+# Qdrant (richer vector ops) or Kuzu (richer graph queries) beyond the
+# MemOS Local plugin's bundled SQLite store.
 #
-# All data is persisted under ./data at the project root.
+# v0.1 does NOT need either of these services. Do not start them unless
+# you're explicitly working on Phase 1b storage migration.
+#
+# To start (Phase 1b only):
+#   docker compose -f infra/docker-compose.yml up -d qdrant kuzu
 
-name: mini-ai
+name: mini-ai-aux
 
 networks:
   mini:
@@ -19,9 +20,6 @@ networks:
 volumes:
   qdrant_data:
   kuzu_data:
-  memos_data:
-  skills_data:
-  openclaw_data:
 
 services:
   qdrant:
@@ -37,8 +35,6 @@ services:
       - mini
 
   kuzu:
-    # Kuzu is typically embedded. We run a tiny REST wrapper for service-to-service access.
-    # For v0.1, MemOS can embed Kuzu directly instead — this service is optional.
     image: kuzudb/api-server:latest
     container_name: mini-kuzu
     restart: unless-stopped
@@ -48,63 +44,5 @@ services:
       - kuzu_data:/database
     environment:
       KUZU_DATABASE_PATH: /database/mini.kuzu
-    networks:
-      - mini
-
-  memos:
-    image: memtensor/memos:latest
-    container_name: mini-memos
-    restart: unless-stopped
-    depends_on:
-      - qdrant
-      - kuzu
-    ports:
-      - "127.0.0.1:7070:7070"
-    environment:
-      QDRANT_URL: http://qdrant:6333
-      KUZU_URL: http://kuzu:8000
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}            # MemOS can use OpenAI for its internal LLM ops
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?ANTHROPIC_API_KEY is required — copy .env.example to .env and fill it in}
-      MEMOS_DEFAULT_MODEL: ${MEMOS_DEFAULT_MODEL:-claude-opus-4-7}
-    volumes:
-      - memos_data:/var/lib/memos
-      - ../infra/memos.config.json:/etc/memos/config.json:ro
-    networks:
-      - mini
-
-  openspace:
-    image: hkuds/openspace:latest
-    container_name: mini-openspace
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:7080:7080"
-    environment:
-      OPENSPACE_HOST_SKILL_DIRS: /skills
-      OPENSPACE_WORKSPACE: /workspace
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-    volumes:
-      - ../skills:/skills
-      - skills_data:/workspace
-    networks:
-      - mini
-
-  openclaw:
-    image: openclaw/openclaw:latest
-    container_name: mini-openclaw
-    restart: unless-stopped
-    depends_on:
-      - memos
-      - openspace
-    ports:
-      - "127.0.0.1:7090:7090"
-    environment:
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      MEMOS_URL: http://memos:7070
-      OPENSPACE_MCP_URL: http://openspace:7080
-      HEARTBEAT_ENABLED: ${HEARTBEAT_ENABLED:-true}
-      LOG_LEVEL: ${LOG_LEVEL:-info}
-    volumes:
-      - openclaw_data:/var/lib/openclaw
-      - ../infra/openclaw.config.json:/etc/openclaw/config.json:ro
     networks:
       - mini

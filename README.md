@@ -4,16 +4,18 @@ A brain-mimicking agentic architecture that can **create, curate, refine, rewire
 
 ## Stack
 
-All components are permissively licensed (MIT / Apache 2.0). Zero copyleft. Deployable on any hyperscaler; GCP is the current target.
+All components are permissively licensed (MIT / Apache 2.0). Zero copyleft.
 
-| Layer | Component | License |
-|---|---|---|
-| Orchestration | OpenClaw | MIT |
-| Memory OS | MemOS | Apache 2.0 |
-| Skill library | OpenSpace | Permissive |
-| Vector store | Qdrant | Apache 2.0 |
-| Graph store | Kuzu | MIT |
-| Reasoning | Claude API | N/A (hosted) |
+For v0.1 the stack runs **on the host** — see [`docs/install.md`](docs/install.md) and [`docs/04-deployment-reality.md`](docs/04-deployment-reality.md) for the rationale.
+
+| Layer | Component | License | How it runs |
+|---|---|---|---|
+| Orchestration | [OpenClaw](https://github.com/openclaw/openclaw) | MIT | host (Node 24, `openclaw onboard`) |
+| Memory OS | [MemOS Local plugin](https://github.com/MemTensor/MemOS) | Apache 2.0 | OpenClaw plugin (`@memtensor/memos-local-openclaw-plugin`) |
+| Skill library | [OpenSpace](https://github.com/HKUDS/OpenSpace) | MIT | host MCP server (`openspace-mcp`, Python 3.12) |
+| Vector store (optional) | Qdrant | Apache 2.0 | Docker, deferred to Phase 1b |
+| Graph store (optional) | Kuzu | MIT | Docker, deferred to Phase 1b |
+| Reasoning | Claude API | N/A (hosted) | external |
 
 ## Repository layout
 
@@ -67,37 +69,34 @@ mini-ai/
 
 ## Getting started — local
 
+Full host-install steps: **[`docs/install.md`](docs/install.md)**.
+
+Quick path:
+
 ```bash
-cp .env.example .env                        # fill in ANTHROPIC_API_KEY
-docker compose -f infra/docker-compose.yml up -d
+# Prereqs
+brew install node@24 python@3.12
+
+# 1. OpenClaw (agent runtime) on the host
+npx openclaw onboard
+openclaw plugins install @memtensor/memos-local-openclaw-plugin@latest
+openclaw gateway restart
+
+# 2. OpenSpace (skill runtime) — wired into OpenClaw via MCP
+git clone --filter=blob:none --sparse https://github.com/HKUDS/OpenSpace.git
+cd OpenSpace && git sparse-checkout set '/*' '!assets/' && pip install -e . && cd ..
+
+# 3. Mini.ai's own Python deps (for tests + policy logic)
+cp .env.example .env                       # fill in ANTHROPIC_API_KEY
 pip install -r requirements.txt
-
-# Sanity check
-python -m src.core.cognitive_loop           # pings services
-python -m src.core.cognitive_loop --seed    # loads fixture memories
-
-# Fire policies manually
-python -m src.core.run_policy curation --content "I prefer Docker Compose"
-python -m src.core.run_policy rewire --mode sweep
-python -m src.core.run_policy reflection
-python -m src.core.run_policy pruning --dry-run
-
-# Unit tests (no services needed)
-pytest tests/
+pytest tests/                              # no services needed
 ```
+
+Then edit `~/.openclaw/openclaw.json` to register OpenSpace as an MCP server pointing at `Mini.ai/skills/`. See `docs/install.md` step 3 for the exact JSON.
 
 ## Getting started — GCP
 
-```bash
-cd infra/gcp
-cp terraform.tfvars.example terraform.tfvars   # set project_id + anthropic_api_key
-terraform init && terraform apply
-cd ../..
-./infra/gcp/deploy.sh                           # uploads stack via IAP
-gcloud compute start-iap-tunnel mini-ai 7090 --local-host-port=localhost:7090 --zone=europe-west2-a
-```
-
-Full guide: `infra/gcp/README.md`. Architecture rationale: `infra/gcp/ARCHITECTURE.md`.
+GCP deploy is **deferred to Phase 2**. The current `infra/gcp/` files were written against the old (broken) Docker stack and do not match the host-install path. Track this under [TODO.md](TODO.md) → S048–S052.
 
 ## Reading order
 
@@ -113,11 +112,12 @@ Full guide: `infra/gcp/README.md`. Architecture rationale: `infra/gcp/ARCHITECTU
 
 - ✅ Docs complete (brief, capabilities, design)
 - ✅ Backlog complete (13 epics, 56 stories, Sprint 0 plan, risks)
-- ✅ All six policy specs written (SKILL.md)
-- ✅ All six policies implemented in Python
+- ✅ All six policy SKILL.md specs written
+- ✅ All six policies implemented in Python (logic only — integration glue pending)
 - ✅ Salience + decay unit-tested (10 passing)
-- ✅ Local Docker Compose stack
-- ✅ GCP Terraform + startup + deploy scripts
-- ⏳ End-to-end integration test (Sprint 0 goal)
+- ⚠️ Local Docker Compose stack — **superseded** by host install (Architecture L); see [`docs/04-deployment-reality.md`](docs/04-deployment-reality.md)
+- ⚠️ GCP Terraform + startup + deploy scripts — **deferred to Phase 2**, currently does not match the host-install path
+- ⏳ End-to-end host-install loop (Sprint 0 goal — see [`docs/install.md`](docs/install.md))
+- ⏳ Reshape `src/policies/*.py` into proper OpenSpace skills (Sprint 0)
 - ⏳ Skill-creation policy (E10 — P1, post-v0.1)
 - ⏳ Parametric unlearning (E13 — research / P2)

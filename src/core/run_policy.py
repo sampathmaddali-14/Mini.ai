@@ -1,4 +1,14 @@
 """
+⚠️ STALE — DO NOT USE AS-IS (2026-04-25 Architecture L pivot)
+
+Constructs a PolicyContext that wires a MemoryBridge HTTP client to a service
+that doesn't exist in Arch L. The argparse/dispatch shape is still useful and
+will be reused once policies invoke memory through the local plugin instead.
+
+To be reworked in Sprint 0 (story S015).
+
+Original docstring follows.
+---
 CLI for firing cognitive policies manually. Used by heartbeat or operators.
 
 Usage:
